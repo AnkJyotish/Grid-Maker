@@ -46,6 +46,36 @@
             box-shadow: 0 4px 20px rgba(45, 90, 61, 0.1);
         }
 
+        .brand-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+
+        .brand-logo {
+            height: 80px;
+            width: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--shadow-green);
+        }
+
+        .brand-name {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--shadow-green);
+            margin: 0;
+            text-decoration: none;
+        }
+
+        .brand-name:hover {
+            color: var(--mint-green);
+            text-decoration: underline;
+        }
+
         h1 {
             color: var(--shadow-green);
             font-size: 2.5rem;
@@ -425,6 +455,10 @@
 <body>
     <div class="container">
         <header>
+            <div class="brand-container">
+                <img src="Ankjyotish logo.jpg" alt="AnkJyōtish Logo" class="brand-logo">
+                <a href="index.html" class="brand-name" style="color: var(--shadow-green); text-decoration: none;">AnkJyōtish</a>
+            </div>
             <h1>Match Making</h1>
             <p class="subtitle">Chaldean Numerology + Vedic Grid Compatibility Analysis</p>
         </header>

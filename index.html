@@ -14,13 +14,13 @@
 
   <!-- Authentication Check -->
   <script>
-    // Check authentication on page load
-    document.addEventListener('DOMContentLoaded', function() {
+    // Check authentication immediately on script load
+    (function() {
       // Check if user is authenticated in sessionStorage
       const isAuthenticated = sessionStorage.getItem('ankjyotish_authenticated');
       const sessionUsername = sessionStorage.getItem('ankjyotish_username');
 
-      // If not authenticated, redirect to login
+      // If not authenticated, redirect to login immediately
       if (isAuthenticated !== 'true' || !sessionUsername) {
         console.log('Not authenticated, redirecting to login');
         window.location.href = 'password.html';
@@ -57,7 +57,7 @@
 
       // Authentication successful, continue loading the page
       console.log('Authenticated as:', sessionUsername);
-    });
+    })();
   </script>
 </head>
 <body>
@@ -369,3 +369,4 @@
   </script>
 </body>
 </html>
+

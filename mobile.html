@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Numerology Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+
+    <style>
+        .mobile-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            padding-bottom: 100px;
+        }
+        
+        .input-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .mobile-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+        
+        .generate-btn {
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            background: linear-gradient(135deg, #00ff88, #00cc6a);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.4);
+        }
+        
+        .results-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: none;
+        }
+        
+        .destiny-result {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .destiny-number {
+            font-size: 36px;
+            font-weight: 700;
+            color: #00ff88;
+            margin: 10px 0;
+        }
+        
+        .mobile-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        
+        .mobile-grid-cell {
+            aspect-ratio: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            position: relative;
+            transition: all 0.3s ease;
+            min-height: 60px;
+        }
+        
+        .mobile-grid-cell:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+        
+        .cell-numbers {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 2px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .number-item {
+            color: #00ff88;
+            padding: 2px 4px;
+            border-radius: 3px;
+            background: rgba(0, 255, 136, 0.2);
+        }
+        
+        .destiny-item {
+            color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.2);
+            font-weight: 700;
+        }
+        
+        .error-message {
+            color: #ff6b6b;
+            text-align: center;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* Container padding to lift footer above bottom nav */
+        .container {
+            padding-bottom: 100px;
+        }
+
+        /* Bottom Navigation Bar Styles */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(17, 24, 39, 0.2);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-around;
+            padding: 7px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #9ca3af;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            padding: 8px 16px;
+            border-radius: 8px;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            color: #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+        }
+
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 4px;
+            object-fit: contain;
+        }
+
+        .nav-item span {
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo-container">
+                <img src="Ankjyotish logo.jpg" alt="Brand Logo" class="logo">
+                <h1><a href="index.html" style="color: var(--mint-green); text-decoration: none;">AnkJyōtish</a></h1>
+            </div>
+            <p class="tagline">Mobile Numerology Calculator</p>
+            <p>Discover the hidden vibrations in your mobile number</p>
+        </header>
+
+        <div class="mobile-container">
+            <!-- Input Panel -->
+            <div class="input-panel">
+                <h2>Enter Your Mobile Number</h2>
+                <input type="tel" id="mobileNumber" class="mobile-input" 
+                       placeholder="Enter 10-digit mobile number" 
+                       maxlength="10" pattern="[0-9]{10}">
+                <button class="generate-btn" onclick="calculateMobileNumerology()">
+                    Generate Analysis
+                </button>
+                <button class="generate-btn" onclick="clearForm()" style="background: linear-gradient(135deg, #6b7280, #4b5563); margin-top: 10px;">
+                    Clear
+                </button>
+                <div class="error-message" id="errorMessage">
+                    Please enter a valid 10-digit mobile number
+                </div>
+                <p class="footer-note" style="margin-top: 2rem; text-align: center; font-size: 0.85rem; color: #9ca3af;">© 2025 AnkJyōtish. All rights reserved.</p>
+                <p class="footer-note" style="margin-top: 1rem; text-align: center; font-size: 0.85rem; color: #9ca3af;">Powered by Sudhir K Narula</p>
+            </div>
+
+            <!-- Results Panel -->
+            <div class="results-panel" id="resultsPanel">
+                <div class="destiny-result">
+                    <h3>Mobile Destiny Analysis</h3>
+                    <p>Mobile Destiny Number = <span class="destiny-number" id="mobileDestiny">0</span></p>
+                </div>
+
+                <h4 style="text-align: center; margin-bottom: 20px;">Vedic Numerology Grid</h4>
+                <div class="mobile-grid" id="mobileGrid">
+                    <!-- Grid cells will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Vedic numerology mapping: number -> cell position (1-9)
+        const vedicMapping = {
+            1: 2,  // 1 goes to cell 2
+            2: 7,  // 2 goes to cell 7
+            3: 1,  // 3 goes to cell 1
+            4: 9,  // 4 goes to cell 9
+            5: 6,  // 5 goes to cell 6
+            6: 4,  // 6 goes to cell 4
+            7: 5,  // 7 goes to cell 5
+            8: 8,  // 8 goes to cell 8
+            9: 3   // 9 goes to cell 3
+        };
+
+        function calculateMobileNumerology() {
+            const mobileInput = document.getElementById('mobileNumber').value;
+            const errorMessage = document.getElementById('errorMessage');
+            const resultsPanel = document.getElementById('resultsPanel');
+
+            // Validate input
+            if (!/^\d{10}$/.test(mobileInput)) {
+                errorMessage.style.display = 'block';
+                resultsPanel.style.display = 'none';
+                return;
+            }
+
+            errorMessage.style.display = 'none';
+
+            // Calculate mobile destiny
+            const digits = mobileInput.split('').map(Number);
+            const mobileDestiny = digits.reduce((sum, digit) => sum + digit, 0);
+            const reducedDestiny = reduceToSingleDigit(mobileDestiny);
+
+            // Group digits by their vedic grid positions
+            const gridDigits = {};
+
+            for (let i = 1; i <= 9; i++) {
+                gridDigits[i] = [];
+            }
+
+            // Place mobile digits in their respective grid positions
+            digits.forEach(digit => {
+                if (digit >= 1 && digit <= 9) {
+                    const cellPosition = vedicMapping[digit];
+                    gridDigits[cellPosition].push(digit);
+                }
+            });
+
+            // Add destiny number to its position
+            const destinyCellPosition = vedicMapping[reducedDestiny];
+            gridDigits[destinyCellPosition].push(reducedDestiny);
+
+            // Store results in sessionStorage
+            const mobileData = {
+                mobileNumber: mobileInput,
+                mobileDestiny: reducedDestiny,
+                gridDigits: gridDigits
+            };
+            sessionStorage.setItem('mobileNumerologyData', JSON.stringify(mobileData));
+
+            // Display results
+            document.getElementById('mobileDestiny').textContent = reducedDestiny;
+
+            // Create grid with destiny number highlighted
+            createMobileGrid(gridDigits, reducedDestiny);
+
+            resultsPanel.style.display = 'block';
+
+            // Scroll to results
+            resultsPanel.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function reduceToSingleDigit(number) {
+            while (number > 9) {
+                number = number.toString().split('').reduce((sum, digit) => sum + Number(digit), 0);
+            }
+            return number;
+        }
+        
+        function createMobileGrid(gridDigits, destinyNumber) {
+            const gridContainer = document.getElementById('mobileGrid');
+            gridContainer.innerHTML = '';
+            
+            // Create 9 cells
+            for (let cellIndex = 1; cellIndex <= 9; cellIndex++) {
+                const cell = document.createElement('div');
+                cell.className = 'mobile-grid-cell';
+                
+                const numbers = gridDigits[cellIndex] || [];
+                
+                // Create cell content
+                const numbersDiv = document.createElement('div');
+                numbersDiv.className = 'cell-numbers';
+                
+                if (numbers.length > 0) {
+                    // Track if we've already highlighted the destiny number
+                    let destinyHighlighted = false;
+                    
+                    numbers.forEach(num => {
+                        const numSpan = document.createElement('span');
+                        
+                        // Only highlight the first occurrence of the destiny number
+                        if (num === destinyNumber && !destinyHighlighted) {
+                            numSpan.className = 'number-item destiny-item';
+                            destinyHighlighted = true;
+                        } else {
+                            numSpan.className = 'number-item';
+                        }
+                        
+                        numSpan.textContent = num;
+                        numbersDiv.appendChild(numSpan);
+                    });
+                }
+                
+                cell.appendChild(numbersDiv);
+                gridContainer.appendChild(cell);
+            }
+        }
+        
+        // Allow Enter key to trigger calculation
+        document.getElementById('mobileNumber').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                calculateMobileNumerology();
+            }
+        });
+        
+        // Load saved data on page load
+        function loadSavedData() {
+            const savedData = sessionStorage.getItem('mobileNumerologyData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                document.getElementById('mobileNumber').value = data.mobileNumber || '';
+
+                // Restore results if available
+                if (data.mobileDestiny && data.gridDigits) {
+                    document.getElementById('mobileDestiny').textContent = data.mobileDestiny;
+                    createMobileGrid(data.gridDigits, data.mobileDestiny);
+                    document.getElementById('resultsPanel').style.display = 'block';
+                }
+            }
+        }
+
+        // Auto-focus on input field
+        document.getElementById('mobileNumber').focus();
+
+        // Clear form and saved data
+        function clearForm() {
+            document.getElementById('mobileNumber').value = '';
+            document.getElementById('resultsPanel').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+
+            // Clear saved data from sessionStorage
+            sessionStorage.removeItem('mobileNumerologyData');
+        }
+
+        // Load saved data when page loads
+        document.addEventListener('DOMContentLoaded', loadSavedData);
+    </script>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav" id="bottomNav">
+      <a href="index.html" class="nav-item" aria-label="Home">
+        <img src="home.png" alt="Home" class="nav-icon">
+        <span>Home</span>
+      </a>
+      <a href="name.html" class="nav-item" aria-label="Name">
+        <img src="user.png" alt="Name" class="nav-icon">
+        <span>Name</span>
+      </a>
+      <a href="mobile.html" class="nav-item active" aria-label="Mobile">
+        <img src="mobile-phone.png" alt="Mobile" class="nav-icon">
+        <span>Mobile</span>
+      </a>
+      <a href="match.html" class="nav-item" aria-label="Match">
+        <img src="couple.png" alt="Match" class="nav-icon">
+        <span>Match</span>
+      </a>
+      <a href="chart.html" class="nav-item" aria-label="Chart">
+        <img src="calendar.png" alt="Chart" class="nav-icon">
+        <span>Chart</span>
+      </a>
+    </nav>
+</body>
+</html>

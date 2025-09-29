@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Name Numerology</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-shadowed-green: #A1D1B1;
+      --bg-card: #111827;
+      --mint-green: #4ade80;
+      --gold: #facc15;
+      --text-light: #e5e7eb;
+      --text-muted: #9ca3af;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg-shadowed-green);
+      color: var(--text-light);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      flex-direction: column;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 600px;
+      padding-bottom: 100px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: 12px;
+      padding: 2rem 2.5rem;
+      box-shadow: 0 8px 24px rgba(0,0,0,.6);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: var(--mint-green);
+      font-weight: 700;
+    }
+
+    label {
+      display: block;
+      margin-bottom: .5rem;
+      font-weight: 600;
+      color: var(--text-light);
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: .75rem 1rem;
+      border: none;
+      border-radius: 8px;
+      background: #1f2937;
+      color: var(--text-light);
+      font-size: 1rem;
+    }
+
+    input[type="text"]:focus {
+      outline: 2px solid var(--mint-green);
+    }
+
+    button {
+      margin-top: 1.25rem;
+      width: 100%;
+      padding: .85rem;
+      border: none;
+      border-radius: 8px;
+      background: var(--mint-green);
+      color: var(--bg-card);
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background .3s;
+    }
+
+    button:hover {
+      background: #22c55e;
+    }
+
+    .results {
+      margin-top: 2rem;
+    }
+
+    .result-line {
+      font-size: 1.1rem;
+      margin: .5rem 0;
+    }
+
+    .result-line span:first-child {
+      color: var(--gold);
+      font-weight: 600;
+    }
+
+    .result-line span:last-child {
+      color: var(--text-muted);
+    }
+
+    .footer-note {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: .85rem;
+      color: var(--text-muted);
+    }
+
+    .logo-container {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .logo {
+      max-width: 150px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    /* Bottom Navigation Bar Styles */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(17, 24, 39, 0.5);
+      backdrop-filter: blur(10px);
+      display: flex;
+      justify-content: space-around;
+      padding: 7px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: 1000;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-decoration: none;
+      color: #9ca3af;
+      font-size: 12px;
+      transition: all 0.3s ease;
+      padding: 8px 16px;
+      border-radius: 8px;
+    }
+
+    .nav-item:hover,
+    .nav-item.active {
+      color: #00ff88;
+      background: rgba(0, 255, 136, 0.1);
+    }
+
+    .nav-icon {
+      width: 24px;
+      height: 24px;
+      margin-bottom: 4px;
+      object-fit: contain;
+    }
+
+    .nav-item span {
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo-container">
+      <img src="Ankjyotish logo.jpg" alt="Brand Logo" class="logo">
+      <h1 style="color: peru; text-decoration: none;"><a href="index.html" style="color: peru; text-decoration: none;">AnkJyōtish</a></h1>
+    </div>
+    <div class="card">
+      <h1>Name Numerology Calculator</h1>
+
+      <label for="nameInput">Enter your full name:</label>
+      <input type="text" id="nameInput" placeholder="e.g. Dhananjay Narula" autocomplete="off"/>
+
+      <button onclick="calculateNumbers()">Calculate</button>
+      <button onclick="clearForm()" style="background: #6b7280; margin-top: 0.5rem;">Clear</button>
+
+      <div class="results" id="results" style="display:none;">
+        <div class="result-line">
+          <span id="firstNameLabel"></span>
+          <span id="firstNameResult"></span>
+        </div>
+        <div class="result-line">
+          <span id="fullNameLabel"></span>
+          <span id="fullNameResult"></span>
+        </div>
+      </div>
+      <p class="footer-note" style="margin-top: 2rem; text-align: center; font-size: 0.85rem; color: #9ca3af;">© 2025 AnkJyōtish. All rights reserved.</p>
+      <p class="footer-note" style="margin-top: 1rem; text-align: center; font-size: 0.85rem; color: #9ca3af;">Powered by Sudhir K Narula</p>
+    </div>
+  </div>
+
+    <script>
+    // Chaldean mapping
+    const chaldean = {
+      A:1, I:1, J:1, Q:1, Y:1,
+      B:2, K:2, R:2,
+      C:3, G:3, L:3, S:3,
+      D:4, M:4, T:4,
+      E:5, H:5, N:5, X:5,
+      U:6, V:6, W:6,
+      O:7, Z:7,
+      F:8, P:8
+    };
+
+function valueOf(char) {
+  return chaldean[char.toUpperCase()] || 0;
+}
+
+function reduce(num) {
+  if (num === 0) return 0;
+  while (num > 9) {
+    num = num.toString().split('').reduce((a,b)=>+a + +b, 0);
+  }
+  return num;
+}
+
+    function calculateNumbers() {
+      const raw = document.getElementById('nameInput').value.trim();
+      if (!raw) return;
+
+      const parts = raw.split(/\s+/);
+      const firstName = parts[0];
+      const fullName  = raw;
+
+      const firstSum = [...firstName].reduce((sum, ch) => sum + valueOf(ch), 0);
+      const fullSum  = [...fullName].reduce((sum, ch) => sum + (ch === ' ' ? 0 : valueOf(ch)), 0);
+
+      const firstReduced = reduce(firstSum);
+      const fullReduced  = reduce(fullSum);
+
+      // Store results in sessionStorage
+      const nameData = {
+        nameInput: raw,
+        firstName: firstName,
+        fullName: fullName,
+        firstSum: firstSum,
+        fullSum: fullSum,
+        firstReduced: firstReduced,
+        fullReduced: fullReduced
+      };
+      sessionStorage.setItem('nameNumerologyData', JSON.stringify(nameData));
+
+      document.getElementById('firstNameLabel').textContent = `${firstName} - ${firstSum} - ${firstReduced}`;
+      document.getElementById('fullNameLabel').textContent  = `${fullName} - ${fullSum} - ${fullReduced}`;
+
+      document.getElementById('results').style.display = 'block';
+    }
+
+    // Load saved data on page load
+    function loadSavedData() {
+      const savedData = sessionStorage.getItem('nameNumerologyData');
+      if (savedData) {
+        const data = JSON.parse(savedData);
+        document.getElementById('nameInput').value = data.nameInput || '';
+
+        // Restore results if available
+        if (data.firstName && data.fullName) {
+          document.getElementById('firstNameLabel').textContent = `${data.firstName} - ${data.firstSum} - ${data.firstReduced}`;
+          document.getElementById('fullNameLabel').textContent  = `${data.fullName} - ${data.fullSum} - ${data.fullReduced}`;
+          document.getElementById('results').style.display = 'block';
+        }
+      }
+    }
+
+    // Allow Enter key
+    document.getElementById('nameInput').addEventListener('keyup', e => {
+      if (e.key === 'Enter') calculateNumbers();
+    });
+
+    // Clear form and saved data
+    function clearForm() {
+      document.getElementById('nameInput').value = '';
+      document.getElementById('results').style.display = 'none';
+
+      // Clear saved data from sessionStorage
+      sessionStorage.removeItem('nameNumerologyData');
+    }
+
+    // Load saved data when page loads
+    document.addEventListener('DOMContentLoaded', loadSavedData);
+  </script>
+
+  <!-- Bottom Navigation Bar -->
+  <nav class="bottom-nav" id="bottomNav">
+    <a href="index.html" class="nav-item" aria-label="Home">
+      <img src="home.png" alt="Home" class="nav-icon">
+      <span>Home</span>
+    </a>
+    <a href="name.html" class="nav-item active" aria-label="Name">
+      <img src="user.png" alt="Name" class="nav-icon">
+      <span>Name</span>
+    </a>
+    <a href="mobile.html" class="nav-item" aria-label="Mobile">
+      <img src="mobile-phone.png" alt="Mobile" class="nav-icon">
+      <span>Mobile</span>
+    </a>
+    <a href="match.html" class="nav-item" aria-label="Match">
+      <img src="couple.png" alt="Match" class="nav-icon">
+      <span>Match</span>
+    </a>
+    <a href="chart.html" class="nav-item" aria-label="Chart">
+        <img src="calendar.png" alt="Chart" class="nav-icon">
+        <span>Chart</span>
+          </a>
+  </nav>
+</body>
+</html>

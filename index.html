@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Numerology Destiny Calculator</title>
+
+  <!-- Registration Check -->
+  <script>
+      // Check registration immediately on script load
+      (function() {
+          // Check if registered
+          const isRegistered = localStorage.getItem('ankjyotish_registered') === 'true';
+          if (!isRegistered) {
+              console.log('Not registered, redirecting to registration');
+              window.location.href = 'registration.html?redirect=index.html';
+              return;
+          }
+
+          // Registration successful, continue loading the page
+          console.log('Registered user, loading page');
+      })();
+  </script>
+
+  <!-- Fonts & CSS -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css"/>
+
+  <!-- jsPDF for PDF generation -->
+  <script src="jspdf.umd.min.js"></script>
+
+  <!-- Defer JS so it runs after HTML is parsed -->
+  <script defer src="script.js"></script>
+
+</head>
+<body>
+  <div class="container">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="logo-container">
+        <img src="Ankjyotish logo.jpg" alt="Brand Logo" class="logo">
+        <h1><a href="index.html" style="color: var(--mint-green); text-decoration: none;">AnkJyōtish</a></h1>
+      </div>
+      <p class="tagline">Powered by Sudhir K Narula</p>
+      <p>You can transform your life with AnkJyōtish</p>
+    </header>
+
+    <!-- Input Section -->
+    <section class="input-section">
+      <div class="input-card">
+        <h2>Enter Your Details</h2>
+
+        <form id="numerologyForm">
+          <div class="form-group">
+            <label for="fullName">Full Name</label>
+            <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" required>
+          </div>
+
+          <div class="form-group">
+            <label for="birthDate">Birth Date</label>
+            <input type="date" id="birthDate" name="birthDate" required>
+          </div>
+
+          <div class="form-group">
+            <label>Gender</label>
+            <div class="gender-options">
+              <label class="gender-option">
+                <input type="radio" name="gender" value="Male" required>
+                <span>Male</span>
+              </label>
+              <label class="gender-option">
+                <input type="radio" name="gender" value="Female" required>
+                <span>Female</span>
+              </label>
+            </div>
+          </div>
+
+      <button type="submit" class="calculate-btn" id="calculateBtn">
+        <span>Calculate Destiny</span>
+        <div class="ripple"></div>
+      </button>
+    </form>
+  </div>
+</section>
+
+    <!-- User Info Panel -->
+    <section class="user-info-section" id="userInfoSection" style="display:none;">
+      <div class="user-info-card">
+        <h3>Personal Details</h3>
+        <div class="user-details">
+          <div class="detail-item">
+            <span class="detail-label">Name:</span>
+            <span class="detail-value" id="displayName"></span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Date of Birth:</span>
+            <span class="detail-value" id="displayDOB"></span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Gender:</span>
+            <span class="detail-value" id="displayGender"></span>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- Vedic Numerology Grid -->
+    <section class="grid-section" id="gridSection" style="display:none;">
+      <h2>Your Vedic Numerology Grid</h2>
+
+      <!-- 3x3 grid cells: cell1..cell9 (row-major) -->
+      <!-- Mapping used (number -> cell index):
+           Row1: [3, 1, 9]  => cells 1..3
+           Row2: [6, 7, 5]  => cells 4..6
+           Row3: [2, 8, 4]  => cells 7..9
+           So: 1→2, 2→7, 3→1, 4→9, 5→6, 6→4, 7→5, 8→8, 9→3
+      -->
+      <div class="grid-container" id="gridContainer">
+        <div class="grid-cell" id="cell1" data-cell-label="3">
+          <span class="mahadasha-number" style="color:#ff0000ff;">1</span>
+          <span class="antardasha-number" style="color:#ff03dd;">7</span>
+        </div>
+        <div class="grid-cell" id="cell2" data-cell-label="1">
+          <span class="mahadasha-number" style="color:#ff0000ff;">2</span>
+          <span class="antardasha-number" style="color:#ff03dd;">8</span>
+        </div>
+        <div class="grid-cell" id="cell3" data-cell-label="9">
+          <span class="mahadasha-number" style="color:#ff0000ff;">3</span>
+          <span class="antardasha-number" style="color:#ff03dd;">9</span>
+        </div>
+        <div class="grid-cell" id="cell4" data-cell-label="6">
+          <span class="mahadasha-number" style="color:#ff0000ff;">4</span>
+          <span class="antardasha-number" style="color:#ff03dd;">1</span>
+        </div>
+        <div class="grid-cell" id="cell5" data-cell-label="7">
+          <span class="mahadasha-number" style="color:#ff0000ff;">5</span>
+          <span class="antardasha-number" style="color:#ff03dd;">2</span>
+        </div>
+        <div class="grid-cell" id="cell6" data-cell-label="5">
+          <span class="mahadasha-number" style="color:#ff0000ff;">6</span>
+          <span class="antardasha-number" style="color:#ff03dd;">3</span>
+        </div>
+        <div class="grid-cell" id="cell7" data-cell-label="2">
+          <span class="mahadasha-number" style="color:#ff0000ff;">7</span>
+          <span class="antardasha-number" style="color:#ff03dd;">4</span>
+        </div>
+        <div class="grid-cell" id="cell8" data-cell-label="8">
+          <span class="mahadasha-number" style="color:#ff0000ff;">8</span>
+          <span class="antardasha-number" style="color:#ff03dd;">5</span>
+        </div>
+        <div class="grid-cell" id="cell9" data-cell-label="4">
+          <span class="mahadasha-number" style="color:#ff0000ff;">9</span>
+          <span class="antardasha-number" style="color:#ff03dd;">6</span>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Results Section -->
+    <section class="results-section" id="resultsSection" style="display:none;">
+      <div class="results-grid">
+
+        <!-- Basic Number -->
+        <div class="result-card basic-card">
+          <div class="card-header">
+            <h3>Basic Number</h3>
+            <div class="number-display" id="basicNumber">0</div>
+          </div>
+          <div class="card-content">
+            <p id="basicDescription">Your core personality traits and natural abilities.</p>
+          </div>
+        </div>
+
+        <!-- Supportive Numbers -->
+        <div class="result-card supportive-numbers-card">
+          <div class="card-header">
+            <h3>Supportive Number</h3>
+            <div class="number-display" id="supportiveNumbers">0</div>
+          </div>
+          <div class="card-content">
+            <p id="supportiveNumbersDescription">Numbers that support your destiny and provide additional guidance.</p>
+          </div>
+        </div>
+
+        <!-- Destiny Number -->
+        <div class="result-card destiny-card">
+          <div class="card-header">
+            <h3>Destiny Number</h3>
+            <div class="number-display" id="destinyNumber">0</div>
+          </div>
+          <div class="card-content">
+            <p id="destinyDescription">Your life path number reveals your ultimate purpose.</p>
+          </div>
+        </div>
+
+        <!-- Dasha Period -->
+        <div class="result-card dasha-card">
+          <div class="card-header">
+            <h3>Maha Dasha</h3>
+            <div class="period-display" id="currentDasha">Loading...</div>
+          </div>
+          <div class="card-content">
+            <p id="dashaDescription">Your current planetary period influences.</p>
+            <div class="timeline" id="dashaTimeline">
+              <div class="timeline-progress" id="dashaProgress" style="width:0%;"></div>
+            </div>
+            <div class="period-dates">
+              <span id="dashaStart"></span>
+              <span id="dashaEnd"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Antardasha -->
+        <div class="result-card antardasha-card">
+          <div class="card-header">
+            <h3>Antardasha</h3>
+            <div class="period-display" id="currentAntardasha">Loading...</div>
+          </div>
+          <div class="card-content">
+            <p id="antardashaDescription">Sub-period within your current dasha.</p>
+          </div>
+        </div>
+
+        <!-- Lucky No. -->
+        <div class="result-card lucky-no-card">
+          <div class="card-header">
+            <h3>Lucky No.</h3>
+            <div class="number-display" id="luckyNumber">0</div>
+          </div>
+          <div class="card-content">
+            <p id="luckyNumberDescription">Your personal lucky number based on destiny and name vibrations.</p>
+          </div>
+        </div>
+
+        <!-- Lucky Color -->
+        <div class="result-card lucky-color-card">
+          <div class="card-header">
+            <h3>Lucky Color</h3>
+            <div class="color-display" id="luckyColor" style="width: 30px; height: 30px; border-radius: 50%; display: inline-block; margin-right: 10px;"></div>
+            <span id="luckyColorName">Loading...</span>
+          </div>
+          <div class="card-content">
+            <p id="luckyColorDescription">The color that harmonizes with your numerological vibrations.</p>
+          </div>
+        </div>
+
+        <!-- Zodiac Sign -->
+        <div class="result-card zodiac-card">
+          <div class="card-header">
+            <h3>Planet of Destiny</h3>
+            <div class="sign-display" id="zodiacSign">Loading...</div>
+          </div>
+          <div class="card-content">
+            <p id="zodiacDescription">The ruling planet for your destiny number and its numerological significance.</p>
+          </div>
+        </div>
+
+        <!-- Lucky Direction -->
+        <div class="result-card lucky-direction-card">
+          <div class="card-header">
+            <h3>Lucky Direction</h3>
+            <div class="direction-display" id="luckyDirection">Loading...</div>
+          </div>
+          <div class="card-content">
+            <p id="luckyDirectionDescription">The cardinal direction that brings prosperity and positive energy.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detailed Analysis -->
+      <div class="analysis-section">
+        <h2>Detailed Numerology Analysis</h2>
+        <div class="analysis-content" id="analysisContent">
+          <div class="analysis-item">
+            <h4>Destiny Insights</h4>
+            <p id="lifePathInsights">Based on your numbers…</p>
+          </div>
+          <div class="analysis-item">
+            <h4>Recommendations</h4>
+            <p id="recommendations">To maximize this period…</p>
+          </div>
+          <div class="analysis-item">
+            <h4>Destiny Number Influence</h4>
+            <p><strong>Destiny Number <span id="destinyNumberInfluence">1</span></strong></p>
+            <ul id="destinyFeatures">
+              <li>Confident</li>
+              <li>Great Leadership Quality</li>
+              <li>Very Good Management</li>
+              <li>Authoritative</li>
+              <li>Dominating</li>
+              <li>Name & Fame</li>
+              <li>Egoistic</li>
+              <li>Short-Tempered</li>
+              <li>Stubborn</li>
+              <li>Always Motivated & Motivating Others</li>
+              <li>Business Number</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- More Button -->
+      <div class="more-section">
+        <button class="more-btn" onclick="window.location.href='more.html'">More</button>
+        <button id="downloadPdfBtn" class="more-btn" style="margin-left: 15px;">
+          <span>Download PDF</span>
+        </button>
+      </div>
+    </section>
+
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav" id="bottomNav" style="display:none;">
+      <a href="index.html" class="nav-item active" aria-label="Home" style="text-decoration: none;">
+        <img src="home.png" alt="Home" class="nav-icon">
+        <span>Home</span>
+      </a>
+      <a href="name.html" class="nav-item" aria-label="Name" style="text-decoration: none;">
+        <img src="user.png" alt="Name" class="nav-icon">
+        <span>Name</span>
+      </a>
+      <a href="mobile.html" class="nav-item" aria-label="Mobile" style="text-decoration: none;">
+        <img src="mobile-phone.png" alt="Mobile" class="nav-icon">
+        <span>Mobile</span>
+      </a>
+      <a href="match.html" class="nav-item" aria-label="Match" style="text-decoration: none;">
+        <img src="couple.png" alt="Match" class="nav-icon">
+        <span>Match</span>
+      </a>
+      <a href="chart.html" class="nav-item" aria-label="Chart" style="text-decoration: none;">
+        <img src="calendar.png" alt="Chart" class="nav-icon">
+        <span>Chart</span>
+      </a>
+    </nav>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>To access advanced features like Match Making and Dasha calculation (Mahadasha, Antardasha, and Pratyantardasha), please contact the <a href="about-coder.html" style="color:beige; font-size: 20px;">Administrator</a></p>
+      <p>&copy; 2025 AnkJyōtish. All rights reserved.</p>
+      <p>Powered by Sudhir K Narula</p>
+    </footer>
+  </div>
+
+  <!-- Background Animation -->
+  <div class="bg-animation">
+    <div class="floating-number">1</div>
+    <div class="floating-number">3</div>
+    <div class="floating-number">7</div>
+    <div class="floating-number">9</div>
+    <div class="floating-number">5</div>
+    <div class="floating-number">2</div>
+  </div>
+
+  <script>
+    // Save user data on calculate button click
+    document.getElementById('calculateBtn').addEventListener('click', function(e) {
+      const formData = new FormData(document.getElementById('numerologyForm'));
+      const userData = {
+        fullName: formData.get('fullName'),
+        birthDate: formData.get('birthDate'),
+        gender: formData.get('gender')
+      };
+      localStorage.setItem('numerologyData', JSON.stringify(userData));
+    });
+
+    // Function to open chart in new page with user data
+    function openChart() {
+      const userData = localStorage.getItem('numerologyData');
+      if (!userData) {
+        alert('Please calculate your numerology first');
+        return;
+      }
+
+      const data = JSON.parse(userData);
+      const url = `chart.html?dob=${encodeURIComponent(data.birthDate)}&name=${encodeURIComponent(data.fullName)}`;
+      window.open(url, '_blank');
+    }
+
+    // PDF generation function
+    async function generatePdf() {
+      const { jsPDF } = window.jspdf;
+
+      const userDataStr = localStorage.getItem('numerologyData');
+      if (!userDataStr) {
+        alert('Please calculate your numerology first before downloading PDF.');
+        return;
+      }
+      const userData = JSON.parse(userDataStr);
+
+      // Create a new jsPDF instance
+      const pdf = new jsPDF();
+
+      // Load Ganesh image
+      const ganeshImg = new Image();
+      ganeshImg.src = 'ganeshji sticker.jpg';
+      await new Promise((resolve) => {
+        ganeshImg.onload = resolve;
+        ganeshImg.onerror = resolve;
+      });
+
+      // Add Ganesh image at top center
+      if (ganeshImg.complete) {
+        const pageWidth = pdf.internal.pageSize.width;
+        const imgWidth = 40;
+        const imgHeight = 40;
+        const imgX = (pageWidth - imgWidth) / 2;
+        pdf.addImage(ganeshImg, 'JPEG', imgX, 10, imgWidth, imgHeight);
+      }
+
+      // Add header with brand logo and name
+      const img = new Image();
+      img.src = 'Ankjyotish logo.jpg';
+
+      // Wait for image to load
+      await new Promise((resolve) => {
+        img.onload = resolve;
+        img.onerror = resolve;
+      });
+
+      // Draw logo
+      if (img.complete) {
+        pdf.addImage(img, 'JPEG', 10, 70, 30, 30);
+      }
+
+      // Brand name and powered by text
+      pdf.setFontSize(24);
+      pdf.setTextColor(26, 209, 177); // mint green color from CSS
+      pdf.text('AnkJyotish', 45, 80);
+      pdf.setFontSize(12);
+      pdf.setTextColor(120, 184, 153); // lighter mint
+      pdf.text('Powered by Sudhir K Narula', 45, 90);
+
+      // Simple header line
+      pdf.setDrawColor(26, 209, 177);
+      pdf.setLineWidth(0.5);
+      pdf.line(10, 100, 200, 100);
+
+      // Start content below header
+      let y = 115;
+
+      // Add user basic info with styled box
+      pdf.setFillColor(240, 248, 255); // light blue background
+      pdf.rect(10, y - 5, 210, 30, 'F'); // Increased width to 195 to fit text
+      pdf.setFontSize(16);
+      pdf.setTextColor(0, 0, 0); // black text
+      pdf.text(`Name: ${userData.fullName}`, 15, y + 5);
+      y += 8;
+      pdf.text(`Date of Birth: ${new Date(userData.birthDate).toLocaleDateString()}`, 15, y + 5);
+      y += 8;
+      pdf.text(`Gender: ${userData.gender}`, 15, y + 5);
+      y += 20;
+
+      // Add Vedic Numerology Grid
+      pdf.setFontSize(18);
+      pdf.setTextColor(26, 209, 177);
+      pdf.text('Your Vedic Numerology Grid', 15, y);
+      y += 15;
+
+      // Draw the 3x3 grid
+      const cellSize = 20;
+      const startX = 15;
+      const startY = y;
+      for (let row = 0; row < 3; row++) {
+        for (let col = 0; col < 3; col++) {
+          const cellIndex = row * 3 + col + 1;
+          const cellId = `cell${cellIndex}`;
+          const cell = document.getElementById(cellId);
+          const digitChips = cell.querySelectorAll('.digit-chip:not(.mahadasha-number):not(.antardasha-number)');
+          const allNumbers = Array.from(digitChips).map(chip => chip.textContent).join('');
+          const x = startX + col * (cellSize + 5);
+          const yCell = startY + row * (cellSize + 5);
+          // Draw cell border
+          pdf.setDrawColor(0, 0, 0);
+          pdf.setLineWidth(0.5);
+          pdf.rect(x, yCell, cellSize, cellSize);
+          // Add all numbers centered
+          pdf.setFontSize(10);
+          pdf.setTextColor(0, 0, 0);
+          pdf.text(allNumbers, x + cellSize / 2, yCell + cellSize / 2, { align: 'center' });
+        }
+      }
+      y = startY + 3 * (cellSize + 5) + 10;
+
+      // Add all other info from the page's results section
+      // We'll extract the text content from the results section elements
+
+      // Helper to add multiline text with word wrap
+      function addWrappedText(text, x, y, maxWidth, lineHeight) {
+        const lines = pdf.splitTextToSize(text, maxWidth);
+        pdf.text(lines, x, y);
+        return y + lines.length * lineHeight;
+      }
+
+      // Helper to add a beautiful section with colored background and border
+      function addBeautifulSection(title, content, number, y) {
+        // Section background
+        pdf.setFillColor(255, 255, 255); // white background
+        pdf.setDrawColor(26, 209, 177); // mint green border
+        pdf.setLineWidth(1);
+        pdf.rect(10, y - 3, 190, 28, 'FD'); // filled and stroked, compact height
+
+        // Title with color
+        pdf.setFontSize(18);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(26, 209, 177); // mint green for title
+        pdf.text(title, 15, y + 5);
+
+        // Number display with circle
+        if (number) {
+          if (title === 'Lucky Number') {
+            pdf.setFillColor(26, 209, 177);
+            pdf.circle(180, y + 10, 6, 'F');
+            pdf.setTextColor(255, 255, 255);
+            pdf.setFontSize(12);
+            pdf.text(number.toString(), 176.79, y + 12); // Centered in circle
+          } else {
+            pdf.setFillColor(26, 209, 177);
+            pdf.circle(180, y + 10, 6, 'F');
+            pdf.setTextColor(255, 255, 255);
+            if (number.toString().includes(',')) {
+              pdf.setFontSize(12);
+              pdf.text(number.toString(), 176.79, y + 12); // Centered in circle
+            } else {
+              pdf.setFontSize(15);
+              pdf.text(number.toString(), 179, y + 12); // Centered in circle
+            }
+          }
+        }
+
+        y += 12;
+
+        // Content
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(12);
+        pdf.setTextColor(0, 0, 0); // black for content
+        y = addWrappedText(content, 15, y, 180, 6);
+        y += 10;
+
+        return y;
+      }
+
+      // Basic Number and Description
+      const basicNumber = document.getElementById('basicNumber').textContent;
+      const basicDescription = document.getElementById('basicDescription').textContent;
+      y = addBeautifulSection('Basic Number', `Number: ${basicNumber}\n${basicDescription}`, basicNumber, y);
+
+      // Add new page for additional sections
+      pdf.addPage();
+
+      // Add header with brand logo and name on second page
+      if (img.complete) {
+        pdf.addImage(img, 'JPEG', 10, 10, 30, 30);
+      }
+      pdf.setFontSize(24);
+      pdf.setTextColor(26, 209, 177);
+      pdf.text('AnkJyotish', 45, 20);
+      pdf.setFontSize(12);
+      pdf.setTextColor(120, 184, 153);
+      pdf.text('Powered by Sudhir K Narula', 45, 30);
+      pdf.setDrawColor(26, 209, 177);
+      pdf.setLineWidth(0.5);
+      pdf.line(10, 40, 200, 40);
+
+      y = 55;
+
+      // Supportive Numbers and Description
+      const supportiveNumbers = document.getElementById('supportiveNumbers').textContent;
+      const supportiveNumbersDescription = document.getElementById('supportiveNumbersDescription').textContent;
+      y = addBeautifulSection('Supportive Number', `Numbers: ${supportiveNumbers}\n${supportiveNumbersDescription}`, supportiveNumbers, y);
+
+      // Destiny Number and Description
+      const destinyNumber = document.getElementById('destinyNumber').textContent;
+      const destinyDescription = document.getElementById('destinyDescription').textContent;
+      y = addBeautifulSection('Destiny Number', `Number: ${destinyNumber}\n${destinyDescription}`, destinyNumber, y);
+
+      // Dasha Period
+      const currentDasha = document.getElementById('currentDasha').textContent;
+      const dashaDescription = document.getElementById('dashaDescription').textContent;
+      const dashaStart = document.getElementById('dashaStart').textContent;
+      const dashaEnd = document.getElementById('dashaEnd').textContent;
+      y = addBeautifulSection('Maha Dasha', `Period: ${currentDasha} (${dashaStart} - ${dashaEnd})\n${dashaDescription}`, null, y);
+
+      // Antardasha
+      const currentAntardasha = document.getElementById('currentAntardasha').textContent;
+      const antardashaDescription = document.getElementById('antardashaDescription').textContent;
+      y = addBeautifulSection('Antardasha', `Period: ${currentAntardasha}\n${antardashaDescription}`, null, y);
+
+      // Lucky Number
+      const luckyNumber = document.getElementById('luckyNumber').textContent;
+      const luckyNumberDescription = document.getElementById('luckyNumberDescription').textContent;
+      y = addBeautifulSection('Lucky Number', `Number(s): ${luckyNumber}\n${luckyNumberDescription}`, luckyNumber, y);
+
+      // Lucky Direction
+      const luckyDirection = document.getElementById('luckyDirection').textContent;
+      const luckyDirectionDescription = document.getElementById('luckyDirectionDescription').textContent;
+      y = addBeautifulSection('Lucky Direction', `Direction: ${luckyDirection}\n${luckyDirectionDescription}`, null, y);
+
+      // Lucky Color
+      const luckyColorName = document.getElementById('luckyColorName').textContent;
+      const luckyColorDescription = document.getElementById('luckyColorDescription').textContent;
+      y = addBeautifulSection('Lucky Color', `Color: ${luckyColorName}\n${luckyColorDescription}`, null, y);
+
+      // Add new page for remaining sections
+      pdf.addPage();
+
+      // Add header with brand logo and name on third page
+      if (img.complete) {
+        pdf.addImage(img, 'JPEG', 10, 10, 30, 30);
+      }
+      pdf.setFontSize(24);
+      pdf.setTextColor(26, 209, 177);
+      pdf.text('AnkJyotish', 45, 20);
+      pdf.setFontSize(12);
+      pdf.setTextColor(120, 184, 153);
+      pdf.text('Powered by Sudhir K Narula', 45, 30);
+      pdf.setDrawColor(26, 209, 177);
+      pdf.setLineWidth(0.5);
+      pdf.line(10, 40, 200, 40);
+
+      y = 55;
+
+      // Planet of Destiny
+      const zodiacSign = document.getElementById('zodiacSign').textContent;
+      const zodiacDescription = document.getElementById('zodiacDescription').textContent;
+      y = addBeautifulSection('Planet of Destiny', `Planet: ${zodiacSign}\n${zodiacDescription}`, null, y);
+
+      // Destiny Number Influence
+      const destinyNumberInfluence = document.getElementById('destinyNumberInfluence').textContent;
+      pdf.setFontSize(20);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(26, 209, 177);
+      pdf.text('Destiny Number Influence', 15, y);
+      y += 15;
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(14);
+      pdf.setTextColor(0, 0, 0);
+      y = addWrappedText(`Destiny Number ${destinyNumberInfluence}`, 15, y, 180, 8);
+      y += 15;
+
+      // Get the list items from destinyFeatures ul with bullet points
+      const destinyUl = document.getElementById('destinyFeatures');
+      const listItems = destinyUl.querySelectorAll('li');
+      pdf.setFontSize(14);
+      pdf.setTextColor(0, 0, 0);
+      listItems.forEach(item => {
+        pdf.text('•', 15, y);
+        y = addWrappedText(item.textContent, 25, y, 150, 3.5);
+        y += 5;
+      });
+      y += 10;
+
+      // Add footer with decorative elements
+      pdf.setDrawColor(26, 209, 177);
+      pdf.setLineWidth(1);
+      pdf.line(10, 280, 200, 279);
+      pdf.setFontSize(10);
+      pdf.setTextColor(120, 180, 153);
+      pdf.text('Want deeper insights about life and career? Reach out to Sudhir Sir.', 50, 286.5);
+      pdf.text('Generated with AnkJyotish - Powered By Sudhir K Narula', 60, 293.5);
+
+      // Save the PDF
+      pdf.save(`${userData.fullName}_AnkJyotish_Numerology.pdf`);
+    }
+
+    // Attach event listener to download button
+    document.getElementById('downloadPdfBtn').addEventListener('click', generatePdf);
+  </script>
+</body>
+</html>

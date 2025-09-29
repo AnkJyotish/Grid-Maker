@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration - AnkJyōtish</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="rel">
+    
+    <!-- EmailJS -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    
+    <style>
+        :root {
+            --shadow-green: #1C2529;
+            --mint-green: #A1D1B1;
+            --light-mint: #B8E6C7;
+            --dark-mint: #7FB899;
+            --text-light: #FFFFFF;
+            --text-dark: #1C2529;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --error-red: #ff6b6b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--shadow-green) 0%, #2A3B40 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* Background Animation */
+        .bg-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .floating-number {
+            position: absolute;
+            font-size: 3rem;
+            font-weight: 700;
+            color: rgba(161, 209, 177, 0.1);
+            animation: float 15s infinite linear;
+        }
+
+        .floating-number:nth-child(1) { top: 20%; left: 10%; animation-delay: 0s; }
+        .floating-number:nth-child(2) { top: 60%; right: 15%; animation-delay: 3s; }
+        .floating-number:nth-child(3) { bottom: 30%; left: 20%; animation-delay: 6s; }
+        .floating-number:nth-child(4) { bottom: 10%; right: 25%; animation-delay: 9s; }
+
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.3; }
+            90% { opacity: 0.3; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* Main Container */
+        .password-container {
+            position: relative;
+            z-index: 1;
+            max-width: 450px;
+            width: 90%;
+            padding: 60px 50px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(161, 209, 177, 0.2);
+            border-radius: 25px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Brand Section */
+        .brand-section {
+            margin-bottom: 40px;
+        }
+
+        .brand-logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, var(--mint-green), var(--dark-mint));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--shadow-green);
+            box-shadow: 0 8px 25px rgba(161, 209, 177, 0.3);
+        }
+
+        .brand-name {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--mint-green), var(--light-mint));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .brand-tagline {
+            font-size: 1rem;
+            opacity: 0.8;
+            color: var(--light-mint);
+        }
+
+        /* Form Styles */
+        .password-form {
+            margin-top: 30px;
+        }
+
+        .form-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: var(--mint-green);
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            color: var(--light-mint);
+            text-align: left;
+        }
+
+        .password-input {
+            width: 100%;
+            padding: 18px 20px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(161, 209, 177, 0.3);
+            border-radius: 12px;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+        }
+
+        .password-input:focus {
+            outline: none;
+            border-color: var(--mint-green);
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 0 0 3px rgba(161, 209, 177, 0.2);
+        }
+
+        .password-input::placeholder {
+            color: rgba(161, 209, 177, 0.6);
+        }
+
+        .gender-options {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .gender-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .gender-option input[type="radio"] {
+            accent-color: var(--mint-green);
+        }
+
+        .gender-option span {
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--mint-green), var(--dark-mint));
+            border: none;
+            border-radius: 12px;
+            color: var(--shadow-green);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(161, 209, 177, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Error Message */
+        .error-message {
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            border-radius: 8px;
+            color: var(--error-red);
+            font-size: 0.9rem;
+            display: none;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Success Animation */
+        .success-animation {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .success-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 15px;
+            border-radius: 50%;
+            background: var(--mint-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: scaleIn 0.5s ease-out;
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .password-container {
+                padding: 40px 30px;
+                margin: 20px;
+            }
+            
+            .brand-name {
+                font-size: 1.8rem;
+            }
+            
+            .brand-logo {
+                width: 70px;
+                height: 70px;
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="bg-animation">
+        <div class="floating-number">7</div>
+        <div class="floating-number">3</div>
+        <div class="floating-number">9</div>
+        <div class="floating-number">1</div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="password-container">
+        <!-- Brand Section -->
+        <div class="brand-section">
+            <div class="brand-logo">
+                <img src="Ankjyotish logo.jpg" alt="Ankjyotish" style="width: 100%; height: 100%; border-radius: 50%;">
+            </div>
+            <h1 class="brand-name">AnkJyōtish</h1>
+            <p class="brand-tagline">You can transform your life with AnkJyōtish</p>
+        </div>
+
+        <!-- Registration Form -->
+        <form class="password-form" id="registrationForm">
+            <h2 class="form-title">User Registration</h2>
+            
+            <div class="input-group">
+                <label for="nameInput">Name</label>
+                <input 
+                    type="text" 
+                    id="nameInput" 
+                    class="password-input" 
+                    placeholder="Enter your full name" 
+                    required
+                >
+            </div>
+            
+            <div class="input-group">
+                <label for="dobInput">Date of Birth</label>
+                <input 
+                    type="date" 
+                    id="dobInput" 
+                    class="password-input" 
+                    required
+                >
+            </div>
+            
+            <div class="input-group">
+                <label>Gender</label>
+                <div class="gender-options">
+                    <label class="gender-option">
+                        <input type="radio" name="gender" value="Male" required>
+                        <span>Male</span>
+                    </label>
+                    <label class="gender-option">
+                        <input type="radio" name="gender" value="Female" required>
+                        <span>Female</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label for="emailInput">Email</label>
+                <input 
+                    type="email" 
+                    id="emailInput" 
+                    class="password-input" 
+                    placeholder="Enter your email" 
+                    required
+                >
+            </div>
+            
+            <div class="input-group">
+                <label for="phoneInput">Phone Number</label>
+                <input 
+                    type="tel" 
+                    id="phoneInput" 
+                    class="password-input" 
+                    placeholder="Enter your phone number" 
+                    required
+                >
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+                <span>REGISTER</span>
+            </button>
+
+            <div class="error-message" id="errorMessage">
+                Please fill all fields correctly.
+            </div>
+
+            <div class="success-animation" id="successAnimation">
+                <div class="success-icon">✓</div>
+                <p>Registration successful! Redirecting...</p>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // DOM Elements
+        const registrationForm = document.getElementById('registrationForm');
+        const nameInput = document.getElementById('nameInput');
+        const dobInput = document.getElementById('dobInput');
+        const genderInputs = document.querySelectorAll('input[name="gender"]');
+        const emailInput = document.getElementById('emailInput');
+        const phoneInput = document.getElementById('phoneInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const errorMessage = document.getElementById('errorMessage');
+        const successAnimation = document.getElementById('successAnimation');
+
+        // Registration page is accessible without authentication
+
+        // Initialize EmailJS (replace with your public key)
+        emailjs.init("9RDiXtEjfg8mXUV5l");
+
+        // Handle form submission
+        registrationForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const name = nameInput.value.trim();
+            const dob = dobInput.value;
+            const gender = document.querySelector('input[name="gender"]:checked')?.value;
+            const email = emailInput.value.trim();
+            const phone = phoneInput.value.trim();
+
+            if (!name || !dob || !gender || !email || !phone) {
+                errorMessage.textContent = 'Please fill all fields';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            // Validate email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                errorMessage.textContent = 'Please enter a valid email';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            // Disable button during processing
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span>Registering...</span>';
+            errorMessage.style.display = 'none';
+
+            // Send email via EmailJS
+            emailjs.send("service_nob665v", "template_46mb6dr", {
+                name: name,
+                dob: dob,
+                gender: gender,
+                email: email,
+                phone: phone,
+                to_email: "dhananjay0376@gmail.com"
+            }).then(() => {
+                // Success
+                successAnimation.style.display = 'block';
+                localStorage.setItem('ankjyotish_registered', 'true');
+
+                // Get redirect param or default to index.html
+                const urlParams = new URLSearchParams(window.location.search);
+                const finalRedirect = urlParams.get('redirect') || 'index.html';
+
+                setTimeout(() => {
+                    window.location.href = finalRedirect;
+                }, 1500);
+            }).catch((error) => {
+                console.error('Email send failed:', error);
+                errorMessage.textContent = 'Registration failed. Please try again.';
+                errorMessage.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>REGISTER</span>';
+            });
+        });
+    </script>
+</body>
+</html>

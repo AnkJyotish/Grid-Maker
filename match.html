@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Match-Making</title>
+
+    <!-- Authentication Check -->
+    <script>
+        // Check authentication on page load
+        function checkAuthentication() {
+            const isAuthenticated = localStorage.getItem('ankjyotish_authenticated');
+            const username = localStorage.getItem('ankjyotish_username');
+            const userData = JSON.parse(localStorage.getItem('ankjyotish_userdata') || '{}');
+            const loginTimestamp = parseInt(localStorage.getItem('ankjyotish_loginTimestamp') || '0');
+            const isWithinTimeLimit = Date.now() - loginTimestamp < 50 * 60 * 60 * 1000; // 50 hours
+
+            if (isAuthenticated === 'true' && username && userData.password && isWithinTimeLimit) {
+                // Check subscription expiration
+                const now = new Date();
+                const expiration = new Date(userData.expiration);
+
+                if (now > expiration) {
+                    console.log('Subscription expired');
+                    // Clear local data
+                    localStorage.removeItem('ankjyotish_authenticated');
+                    localStorage.removeItem('ankjyotish_username');
+                    localStorage.removeItem('ankjyotish_userdata');
+                    localStorage.removeItem('ankjyotish_loginTimestamp');
+                    // Redirect to login
+                    window.location.href = 'password.html?redirect=match.html';
+                    return false;
+                }
+
+                // Authentication successful
+                console.log('Authenticated as:', username);
+                return true;
+            } else {
+                // Not authenticated or time limit exceeded
+                if (isAuthenticated === 'true') {
+                    // Clear invalid data
+                    localStorage.removeItem('ankjyotish_authenticated');
+                    localStorage.removeItem('ankjyotish_username');
+                    localStorage.removeItem('ankjyotish_userdata');
+                    localStorage.removeItem('ankjyotish_loginTimestamp');
+                }
+                // Redirect to login
+                window.location.href = 'password.html?redirect=match.html';
+                return false;
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthentication();
+        });
+    </script>
+
+    <style>
+        :root {
+            --shadow-green: #2d5a3d;
+            --mint-green: #a8e6cf;
+            --light-mint: #d4f1e8;
+            --white: #ffffff;
+            --gray: #f5f5f5;
+            --dark-gray: #333333;
+            --red: #ff6b6b;
+            --green: #51cf66;
+            --yellow: #ffd43b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, var(--light-mint), var(--white));
+            min-height: 100vh;
+            color: var(--dark-gray);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            padding-bottom: 80px; /* Added bottom padding to lift footer */
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 0;
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(45, 90, 61, 0.1);
+        }
+
+        .brand-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+
+        .brand-logo {
+            height: 80px;
+            width: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--shadow-green);
+        }
+
+        .brand-name {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--shadow-green);
+            margin: 0;
+            text-decoration: none;
+        }
+
+        .brand-name:hover {
+            color: var(--mint-green);
+            text-decoration: underline;
+        }
+
+        h1 {
+            color: var(--shadow-green);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.2rem;
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(45, 90, 61, 0.1);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--shadow-green);
+        }
+
+        input[type="text"],
+        input[type="date"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--light-mint);
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--mint-green);
+        }
+
+        .error {
+            color: var(--red);
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: var(--shadow-green);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: #1e3d2a;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--mint-green);
+            color: var(--shadow-green);
+        }
+
+        .btn-secondary:hover {
+            background: #8fd4b8;
+            transform: translateY(-2px);
+        }
+
+        .results-summary {
+            text-align: center;
+            display: none;
+        }
+
+        .compatibility-result {
+            margin: 30px 0;
+        }
+
+        .compatibility-verdict {
+            font-size: 2.5rem;
+            font-weight: bold;
+            padding: 20px 40px;
+            border-radius: 15px;
+            display: inline-block;
+            margin: 20px 0;
+        }
+
+        .compatibility-verdict.good {
+            background: var(--mint-green);
+            color: var(--shadow-green);
+            border: 2px solid var(--shadow-green);
+        }
+
+        .compatibility-verdict.bad {
+            background: #ffe0e0;
+            color: var(--red);
+            border: 2px solid var(--red);
+        }
+
+        .compatibility-verdict.neutral {
+            background: #fff3cd;
+            color: #856404;
+            border: 2px solid #ffd43b;
+        }
+
+        .compatibility-verdict.avoid {
+            background: #ffe0e0;
+            color: #aa1e1e;
+            border: 2px solid #ff0000;
+        }
+
+        .numbers-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .person-card {
+            background: var(--light-mint);
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .person-card h3 {
+            color: var(--shadow-green);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .number-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .number-table td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .number-table td:first-child {
+            font-weight: bold;
+            color: var(--shadow-green);
+        }
+
+        /* New Grid Styles */
+        .grid-section {
+            display: flex;
+            flex-direction: row;
+            gap: 40px;
+            align-items: flex-start;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .partner-grid-container {
+            flex: 1;
+            min-width: 300px;
+            max-width: 450px;
+        }
+
+        .partner-grid-card {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(45, 90, 61, 0.1);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .partner-grid-card h3 {
+            color: var(--shadow-green);
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .vedic-grid-large {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 8px;
+            margin: 0 auto;
+            max-width: 300px;
+            width: 100%;
+            aspect-ratio: 1;
+        }
+
+        .vedic-grid-large .grid-cell {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            min-height: 80px;
+            background: var(--white);
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .vedic-grid-large .grid-cell:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(45, 90, 61, 0.2);
+        }
+
+        .vedic-grid-large .grid-cell.missing {
+            border-color: var(--red);
+            background: #ffe0e0;
+        }
+
+        .vedic-grid-large .grid-cell.strong {
+            background: var(--mint-green);
+            color: var(--shadow-green);
+        }
+
+        @media (max-width: 768px) {
+            .grid-section {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .partner-grid-container {
+                width: 100%;
+                max-width: 400px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .grid-section {
+                gap: 20px;
+            }
+            
+            .partner-grid-container {
+                min-width: auto;
+                max-width: 100%;
+            }
+            
+            .vedic-grid-large {
+                max-width: 250px;
+            }
+            
+            .vedic-grid-large .grid-cell {
+                min-height: 70px;
+                font-size: 1rem;
+            }
+        }
+
+        .aspects-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .aspect-card {
+            background: var(--white);
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .aspect-card h3 {
+            color: var(--shadow-green);
+            margin-bottom: 15px;
+        }
+
+        .aspect-list {
+            list-style: none;
+        }
+
+        .aspect-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .aspect-list li:before {
+            content: "• ";
+            color: var(--mint-green);
+            font-weight: bold;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid,
+            .numbers-grid,
+            .aspects-section {
+                grid-template-columns: 1fr;
+            }
+
+            .vedic-grid-large {
+                max-width: 250px;
+            }
+
+            .vedic-grid-large .grid-cell {
+                min-height: 70px;
+                font-size: 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .score-display {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .vedic-grid-large {
+                max-width: 200px;
+            }
+
+            .vedic-grid-large .grid-cell {
+                min-height: 60px;
+                font-size: 0.9rem;
+            }
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: var(--red);
+            color: white;
+            border-radius: 10px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .scroll-top {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            background: var(--shadow-green);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            display: none;
+        }
+
+        /* Bottom Navigation Bar Styles */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #74f7d63a;
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-around;
+            padding: 7px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #686868;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            padding: 8px 16px;
+            border-radius: 8px;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            color: #0059ff;
+            background: rgba(168, 230, 207, 0.1);
+            box-shadow: 0 0 10px rgba(5, 255, 26, 0.5);
+        }
+
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 4px;
+            object-fit: contain;
+        }
+
+        .nav-item span {
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Form Container -->
+    <div id="loginFormContainer" style="display: none;">
+        <div class="container">
+            <header>
+                <div class="brand-container">
+                    <img src="Ankjyotish logo.jpg" alt="AnkJyōtish Logo" class="brand-logo">
+                    <a href="index.html" class="brand-name" style="color: var(--shadow-green); text-decoration: none;">AnkJyōtish</a>
+                </div>
+                <h1>Login Required</h1>
+                <p>Please login to access Match-Making</p>
+            </header>
+
+            <div class="card">
+                <div id="loginMessage" style="display: none; color: var(--red); margin-bottom: 15px; text-align: center;"></div>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" required placeholder="Enter username">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required placeholder="Enter password">
+                    </div>
+                    <div class="button-group">
+                        <button type="submit" class="btn-primary">Login</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Container -->
+    <div id="mainContent">
+        <div class="container">
+            <header>
+                <div class="brand-container">
+                    <img src="Ankjyotish logo.jpg" alt="AnkJyōtish Logo" class="brand-logo">
+                    <a href="index.html" class="brand-name" style="color: var(--shadow-green); text-decoration: none;">AnkJyōtish</a>
+                </div>
+                <h1>Match-Making</h1>
+            </header>
+
+        <div class="card">
+            <form id="matchForm">
+                <div class="form-grid">
+                    <div>
+                        <h3>Partner A</h3>
+                        <div class="form-group">
+                            <label for="nameA">Full Name</label>
+                            <input type="text" id="nameA" name="nameA" required>
+                            <div class="error" id="nameAError">Please enter a valid name (letters only)</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="dobA">Date of Birth</label>
+                            <input type="date" id="dobA" name="dobA" required>
+                            <div class="error" id="dobAError">Please select a valid date</div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3>Partner B</h3>
+                        <div class="form-group">
+                            <label for="nameB">Full Name</label>
+                            <input type="text" id="nameB" name="nameB" required>
+                            <div class="error" id="nameBError">Please enter a valid name (letters only)</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="dobB">Date of Birth</label>
+                            <input type="date" id="dobB" name="dobB" required>
+                            <div class="error" id="dobBError">Please select a valid date</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="btn-primary">Calculate Compatibility</button>
+                    <button type="button" class="btn-secondary" onclick="fillDemoData()">Fill Demo Data</button>
+                    <button type="button" class="btn-secondary" onclick="clearForm()">Clear</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card results-summary" id="resultsSummary">
+            <h2>Compatibility Results</h2>
+            <div class="compatibility-result" id="compatibilityResult">
+                <div class="compatibility-verdict" id="compatibilityVerdict">Calculate to see compatibility</div>
+            </div>
+        </div>
+
+        <div class="card" id="detailedNumbers" style="display: none;">
+            <h2>Detailed Numerology Analysis</h2>
+            <div class="numbers-grid">
+                <div class="person-card">
+                    <h3>Partner A - <span id="nameADisplay"></span></h3>
+            <table class="number-table">
+                <tr><td>Destiny Number</td><td id="destinyA"></td></tr>
+                <tr><td>Name Number</td><td id="nameNumberA"></td></tr>
+            </table>
+                </div>
+                <div class="person-card">
+                    <h3>Partner B - <span id="nameBDisplay"></span></h3>
+                    <table class="number-table">
+                        <tr><td>Destiny Number</td><td id="destinyB"></td></tr>
+                        <tr><td>Name Number</td><td id="nameNumberB"></td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" id="gridSection" style="display: none;">
+            <h2>Vedic Grid Analysis</h2>
+            <div class="grid-section">
+                <div class="partner-grid-container">
+                    <div class="partner-grid-card">
+                        <h3>Partner A Grid</h3>
+                        <div class="vedic-grid-large" id="gridA"></div>
+                    </div>
+                </div>
+                
+                <div class="partner-grid-container">
+                    <div class="partner-grid-card">
+                        <h3>Partner B Grid</h3>
+                        <div class="vedic-grid-large" id="gridB"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" id="aspectsSection" style="display: none;">
+            <h2>Compatibility Insights</h2>
+            <div class="aspects-section">
+                <div class="aspect-card">
+                    <h3>Best Aspects</h3>
+                    <ul class="aspect-list" id="bestAspects"></ul>
+                </div>
+                <div class="aspect-card">
+                    <h3>Challenges</h3>
+                    <ul class="aspect-list" id="challenges"></ul>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Want deeper match insights? Reach out to Sudhir Sir.</p>
+            <p>© 2025 AnkJyōtish. All rights reserved.</p>
+            <p>Powered By Sudhir K Narula</p>
+        </footer>
+
+        <!-- Bottom Navigation Bar -->
+        <nav class="bottom-nav" id="bottomNav">
+          <a href="index.html" class="nav-item" aria-label="Home">
+            <img src="home.png" alt="Home" class="nav-icon">
+            <span>Home</span>
+          </a>
+          <a href="name.html" class="nav-item" aria-label="Name">
+            <img src="user.png" alt="Name" class="nav-icon">
+            <span>Name</span>
+          </a>
+          <a href="mobile.html" class="nav-item" aria-label="Mobile">
+            <img src="mobile-phone.png" alt="Mobile" class="nav-icon">
+            <span>Mobile</span>
+          </a>
+          <a href="match.html" class="nav-item active" aria-label="Match">
+            <img src="couple.png" alt="Match" class="nav-icon">
+            <span>Match</span>
+          </a>
+          <a href="chart.html" class="nav-item" aria-label="Chart">
+        <img src="calendar.png" alt="Chart" class="nav-icon">
+        <span>Chart</span>
+          </a>
+        </nav>
+    </div>
+
+    <div class="toast" id="toast"></div>
+    <button class="scroll-top" id="scrollTop" onclick="scrollToTop()">↑</button>
+
+    <script>
+        // Chaldean numerology mapping
+        const chaldeanMap = {
+            'A': 1, 'I': 1, 'J': 1, 'Q': 1, 'Y': 1,
+            'B': 2, 'K': 2, 'R': 2,
+            'C': 3, 'G': 3, 'L': 3, 'S': 3,
+            'D': 4, 'M': 4, 'T': 4,
+            'E': 5, 'H': 5, 'N': 5, 'X': 5,
+            'U': 6, 'V': 6, 'W': 6,
+            'O': 7, 'Z': 7,
+            'F': 8, 'P': 8
+        };
+
+        // Vedic grid positions - Updated to match exact positioning rules
+        // 1:2, 2:7, 3:1, 4:9, 5:6, 6:4, 7:5, 8:8, 9:3
+        const vedicMap = { 1: 2, 2: 7, 3: 1, 4: 9, 5: 6, 6: 4, 7: 5, 8: 8, 9: 3 };
+        
+        const vedicPositions = [
+            [3, 1, 9],
+            [6, 7, 5],
+            [2, 8, 4]
+        ];
+
+        // Utility functions
+        function onlyLettersAndSpaces(str) {
+            return /^[A-Za-z\s]+$/.test(str);
+        }
+
+        function sumDigits(n) {
+            return n.toString().split('').reduce((sum, digit) => sum + parseInt(digit), 0);
+        }
+
+        function reduceToDigitPreserveMasters(n) {
+            if (n === 11 || n === 22) return n;
+            let reduced = n;
+            while (reduced > 9 && reduced !== 11 && reduced !== 22) {
+                reduced = sumDigits(reduced);
+            }
+            return reduced;
+        }
+
+        function reduceToSingleDigit(n) {
+            let reduced = n;
+            while (reduced > 9) {
+                reduced = sumDigits(reduced);
+            }
+            return reduced;
+        }
+
+        function cleanName(name) {
+            return name.toUpperCase().replace(/[^A-Z]/g, '');
+        }
+
+        function letterValue(ch) {
+            return chaldeanMap[ch] || 0;
+        }
+
+        function nameTotal(name) {
+            const clean = cleanName(name);
+            return clean.split('').reduce((sum, ch) => sum + letterValue(ch), 0);
+        }
+
+        function vowelTotal(name) {
+            const clean = cleanName(name);
+            const vowels = 'AEIOU';
+            return clean.split('').reduce((sum, ch) => {
+                return vowels.includes(ch) ? sum + letterValue(ch) : sum;
+            }, 0);
+        }
+
+        function consonantTotal(name) {
+            return nameTotal(name) - vowelTotal(name);
+        }
+
+        function destinyFromDOB(yyyy, mm, dd) {
+            const dateStr = yyyy.toString() + mm.toString().padStart(2, '0') + dd.toString().padStart(2, '0');
+            const total = dateStr.split('').reduce((sum, digit) => sum + parseInt(digit), 0);
+            const raw = reduceToDigitPreserveMasters(total);
+            const base = reduceToSingleDigit(total);
+            return { raw, base };
+        }
+
+        function getNameNumbers(name) {
+            const nameRaw = nameTotal(name);
+            
+            return {
+                name: reduceToSingleDigit(nameRaw)
+            };
+        }
+
+        function digitalRoot(n) {
+            n = Math.abs(Number(n) || 0);
+            const r = n % 9;
+            return r === 0 ? 9 : r;
+        }
+
+        function basicNumber(day) {
+            return digitalRoot(day);
+        }
+
+        function destinyNumber(day, month, year) {
+            const sumDigits = (num) => num.toString().split('').reduce((a, d) => a + Number(d), 0);
+            const total = sumDigits(day) + sumDigits(month) + sumDigits(year);
+            let result = digitalRoot(total);
+            
+            // Reduce even master numbers (11, 22) to single digits
+            if (result === 11 || result === 22) {
+                result = sumDigits(result);
+            }
+            
+            return result;
+        }
+
+        function getGridFromDOB(dob) {
+            const [year, month, day] = dob.split('-').map(Number);
+            
+            // Get last two digits of year
+            const yearStr = year.toString();
+            const yearLastTwo = yearStr.slice(-2);
+            
+            // Collect all digits from day, month, and last two digits of year
+            const digits = [
+                ...day.toString().split(''),
+                ...month.toString().split(''),
+                ...yearLastTwo.split('')
+            ].map(Number).filter(n => n >= 1 && n <= 9);
+
+            const counts = { 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0 };
+            digits.forEach(n => counts[n]++);
+            
+            // Add Destiny number as extra occurrence
+            const destiny = destinyNumber(day, month, year);
+            counts[destiny] = (counts[destiny] || 0) + 1;
+
+            // Add Basic number only if date is NOT 1-9, 10, 20, or 30
+            const specialDates = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30];
+            const basic = basicNumber(day);
+            if (!specialDates.includes(day)) {
+                counts[basic] = (counts[basic] || 0) + 1;
+            }
+
+            return counts;
+        }
+
+        function createVedicGrid(counts) {
+            const grid = document.createElement('div');
+            grid.className = 'vedic-grid-large';
+            
+            // Create 9 cells in 3x3 grid based on Vedic mapping
+            // Vedic mapping: 1:2, 2:7, 3:1, 4:9, 5:6, 6:4, 7:5, 8:8, 9:3
+            // Grid positions (row, col) -> cell number:
+            // [3, 1, 9]
+            // [6, 7, 5]
+            // [2, 8, 4]
+            
+            // Create a 3x3 array to hold the numbers for each cell
+            const gridCells = Array(9).fill(null).map(() => []);
+            
+            // Map each number (1-9) to its correct cell based on vedicMap
+            for (let num = 1; num <= 9; num++) {
+                const cellPosition = vedicMap[num] - 1; // Convert to 0-based index
+                const count = counts[num] || 0;
+                
+                // Add the number 'count' times to the appropriate cell
+                for (let i = 0; i < count; i++) {
+                    gridCells[cellPosition].push(num);
+                }
+            }
+            
+            // Create the 3x3 grid with numbers in correct positions
+            for (let cellIndex = 0; cellIndex < 9; cellIndex++) {
+                const cell = document.createElement('div');
+                cell.className = 'grid-cell';
+                
+                const numbersInCell = gridCells[cellIndex];
+                
+                // Display numbers in cell
+                if (numbersInCell.length === 0) {
+                    cell.textContent = '';
+                    cell.classList.add('missing');
+                } else {
+                    cell.innerHTML = numbersInCell.map(n => 
+                        `<span class="digit-chip">${n}</span>`
+                    ).join('');
+                }
+                
+                grid.appendChild(cell);
+            }
+            
+            return grid;
+        }
+
+        function getDestinyCompatibility(destinyA, destinyB) {
+            const compatibilityRules = {
+                1: {
+                    bad: [1, 2],
+                    good: [3, 6, 8],
+                    neutral: [4, 5, 9, 7]
+                },
+                2: {
+                    bad: [1],
+                    good: [2, 3, 6, 8, 7, 9],
+                    avoid: [4, 5]
+                },
+                3: {
+                    good: [3, 7, 9, 5],
+                    neutral: [1, 2, 4, 6, 8]
+                },
+                4: {
+                    bad: [5],
+                    good: [3, 8, 6, 7],
+                    avoid: [2],
+                    neutral: [1, 9]
+                },
+                5: {
+                    bad: [4],
+                    good: [5, 7, 3, 8, 9],
+                    avoid: [2],
+                    neutral: [1, 6]
+                },
+                6: {
+                    good: [6, 2, 7],
+                    neutral: [1, 3, 4, 5, 8, 9]
+                },
+                7: {
+                    good: [7, 5, 3, 9, 1],
+                    neutral: [2, 4, 6, 8]
+                },
+                8: {
+                    good: [3, 9, 7, 5, 2, 1],
+                    neutral: [4, 6, 8]
+                },
+                9: {
+                    good: [3, 7, 5, 1],
+                    neutral: [2, 4, 6, 8, 9]
+                }
+            };
+
+            const rulesA = compatibilityRules[destinyA];
+            if (!rulesA) return "Neutral Compatibility";
+
+            if (rulesA.avoid && rulesA.avoid.includes(destinyB)) {
+                return "Avoid Relationship";
+            } else if (rulesA.bad && rulesA.bad.includes(destinyB)) {
+                return "Bad Compatibility";
+            } else if (rulesA.good && rulesA.good.includes(destinyB)) {
+                return "Good Compatibility";
+            } else {
+                return "Neutral Compatibility";
+            }
+        }
+
+        function calculateCompatibility(personA, personB) {
+            // Use destiny numbers for the new compatibility system
+            const destinyA = personA.destiny.base;
+            const destinyB = personB.destiny.base;
+            
+            const compatibility = getDestinyCompatibility(destinyA, destinyB);
+            
+            return {
+                compatibility: compatibility,
+                destinyA: destinyA,
+                destinyB: destinyB
+            };
+        }
+
+        function generateInsights(compatibility, personA, personB) {
+            const bestAspects = [];
+            const challenges = [];
+            
+            // Destiny number insights
+            const destinyA = personA.destiny.base;
+            const destinyB = personB.destiny.base;
+            
+            if (destinyA === destinyB) {
+                bestAspects.push("Shared destiny numbers create deep understanding");
+            } else if ([1, 2, 4, 7].includes(destinyA) && [1, 2, 4, 7].includes(destinyB)) {
+                bestAspects.push("Complementary destiny numbers support each other's growth");
+            } else {
+                challenges.push("Different destiny numbers may require extra understanding");
+            }
+            
+            // Name insights
+            if (personA.numbers.name === personB.numbers.name) {
+                bestAspects.push("Aligned life purposes and goals");
+            } else {
+                challenges.push("May have different approaches to achieving goals");
+            }
+            
+            // Soul urge insights
+            if (Math.abs(personA.numbers.soul - personB.numbers.soul) <= 2) {
+                bestAspects.push("Similar emotional needs and desires");
+            } else {
+                challenges.push("Different emotional needs may require compromise");
+            }
+            
+            // Grid insights
+            const missingA = Object.keys(personA.grid).filter(n => personA.grid[n] === 0);
+            const missingB = Object.keys(personB.grid).filter(n => personB.grid[n] === 0);
+            
+            missingA.forEach(num => {
+                if (personB.grid[num] > 0) {
+                    bestAspects.push(`Partner B's strength in ${num} complements Partner A's missing ${num}`);
+                }
+            });
+            
+            missingB.forEach(num => {
+                if (personA.grid[num] > 0) {
+                    bestAspects.push(`Partner A's strength in ${num} complements Partner B's missing ${num}`);
+                }
+            });
+            
+            return { bestAspects, challenges };
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.display = 'block';
+            setTimeout(() => toast.style.display = 'none', 3000);
+        }
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function fillDemoData() {
+            document.getElementById('nameA').value = 'Aarav Sharma';
+            document.getElementById('dobA').value = '2001-05-14';
+            document.getElementById('nameB').value = 'Isha Verma';
+            document.getElementById('dobB').value = '1998-11-28';
+        }
+
+        function clearForm() {
+            document.getElementById('matchForm').reset();
+            document.getElementById('resultsSummary').style.display = 'none';
+            document.getElementById('detailedNumbers').style.display = 'none';
+            document.getElementById('gridSection').style.display = 'none';
+            document.getElementById('aspectsSection').style.display = 'none';
+
+            // Clear saved data from sessionStorage
+            sessionStorage.removeItem('matchMakingData');
+
+            // Hide scroll to top button
+            document.getElementById('scrollTop').style.display = 'none';
+        }
+
+        function validateForm() {
+            let isValid = true;
+            
+            const nameA = document.getElementById('nameA').value;
+            const nameB = document.getElementById('nameB').value;
+            const dobA = document.getElementById('dobA').value;
+            const dobB = document.getElementById('dobB').value;
+            
+            // Reset errors
+            document.querySelectorAll('.error').forEach(e => e.style.display = 'none');
+            
+            if (!nameA || !onlyLettersAndSpaces(nameA)) {
+                document.getElementById('nameAError').style.display = 'block';
+                isValid = false;
+            }
+            
+            if (!nameB || !onlyLettersAndSpaces(nameB)) {
+                document.getElementById('nameBError').style.display = 'block';
+                isValid = false;
+            }
+            
+            if (!dobA) {
+                document.getElementById('dobAError').style.display = 'block';
+                isValid = false;
+            }
+            
+            if (!dobB) {
+                document.getElementById('dobBError').style.display = 'block';
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+
+        document.getElementById('matchForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            if (!validateForm()) {
+                showToast('Please fix the errors in the form');
+                return;
+            }
+
+            const nameA = document.getElementById('nameA').value;
+            const nameB = document.getElementById('nameB').value;
+            const dobA = document.getElementById('dobA').value;
+            const dobB = document.getElementById('dobB').value;
+
+            // Parse dates
+            const [yearA, monthA, dayA] = dobA.split('-').map(Number);
+            const [yearB, monthB, dayB] = dobB.split('-').map(Number);
+
+            // Calculate numbers
+            const personA = {
+                name: nameA,
+                destiny: destinyFromDOB(yearA, monthA, dayA),
+                numbers: getNameNumbers(nameA),
+                grid: getGridFromDOB(dobA)
+            };
+
+            const personB = {
+                name: nameB,
+                destiny: destinyFromDOB(yearB, monthB, dayB),
+                numbers: getNameNumbers(nameB),
+                grid: getGridFromDOB(dobB)
+            };
+
+            // Calculate compatibility
+            const compatibility = calculateCompatibility(personA, personB);
+            const insights = generateInsights(compatibility, personA, personB);
+
+            // Store results in sessionStorage
+            const matchData = {
+                nameA: nameA,
+                nameB: nameB,
+                dobA: dobA,
+                dobB: dobB,
+                personA: personA,
+                personB: personB,
+                compatibility: compatibility,
+                insights: insights
+            };
+            sessionStorage.setItem('matchMakingData', JSON.stringify(matchData));
+
+            // Display results using new compatibility system
+            const verdictElement = document.getElementById('compatibilityVerdict');
+            verdictElement.textContent = compatibility.compatibility;
+            verdictElement.className = 'compatibility-verdict ' + compatibility.compatibility.toLowerCase().split(' ')[0];
+
+            // Display names
+            document.getElementById('nameADisplay').textContent = nameA;
+            document.getElementById('nameBDisplay').textContent = nameB;
+
+            // Display numbers - show only reduced single digits
+            document.getElementById('destinyA').textContent = personA.destiny.base;
+            document.getElementById('nameNumberA').textContent = personA.numbers.name;
+
+            document.getElementById('destinyB').textContent = personB.destiny.base;
+            document.getElementById('nameNumberB').textContent = personB.numbers.name;
+
+            // Display grids
+            document.getElementById('gridA').innerHTML = '';
+            document.getElementById('gridA').appendChild(createVedicGrid(personA.grid));
+
+            document.getElementById('gridB').innerHTML = '';
+            document.getElementById('gridB').appendChild(createVedicGrid(personB.grid));
+
+            // Removed combined overlay functionality as requested
+
+            // Display insights
+            const bestAspectsList = document.getElementById('bestAspects');
+            bestAspectsList.innerHTML = '';
+            insights.bestAspects.forEach(aspect => {
+                const li = document.createElement('li');
+                li.textContent = aspect;
+                bestAspectsList.appendChild(li);
+            });
+
+            const challengesList = document.getElementById('challenges');
+            challengesList.innerHTML = '';
+            insights.challenges.forEach(challenge => {
+                const li = document.createElement('li');
+                li.textContent = challenge;
+                challengesList.appendChild(li);
+            });
+
+            // Show sections
+            document.getElementById('resultsSummary').style.display = 'block';
+            document.getElementById('detailedNumbers').style.display = 'block';
+            document.getElementById('gridSection').style.display = 'block';
+            document.getElementById('aspectsSection').style.display = 'block';
+
+            // Scroll to results
+            document.getElementById('resultsSummary').scrollIntoView({ behavior: 'smooth' });
+
+            // Show scroll to top button
+            document.getElementById('scrollTop').style.display = 'block';
+        });
+
+        // Load saved data on page load
+        function loadSavedData() {
+            const savedData = sessionStorage.getItem('matchMakingData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+
+                // Restore form data
+                document.getElementById('nameA').value = data.nameA || '';
+                document.getElementById('nameB').value = data.nameB || '';
+                document.getElementById('dobA').value = data.dobA || '';
+                document.getElementById('dobB').value = data.dobB || '';
+
+                // Restore results if available
+                if (data.compatibility && data.personA && data.personB && data.insights) {
+                    // Display results using new compatibility system
+                    const verdictElement = document.getElementById('compatibilityVerdict');
+                    verdictElement.textContent = data.compatibility.compatibility;
+                    verdictElement.className = 'compatibility-verdict ' + data.compatibility.compatibility.toLowerCase().split(' ')[0];
+
+                    // Display names
+                    document.getElementById('nameADisplay').textContent = data.nameA;
+                    document.getElementById('nameBDisplay').textContent = data.nameB;
+
+                    // Display numbers - show only reduced single digits
+                    document.getElementById('destinyA').textContent = data.personA.destiny.base;
+                    document.getElementById('nameNumberA').textContent = data.personA.numbers.name;
+
+                    document.getElementById('destinyB').textContent = data.personB.destiny.base;
+                    document.getElementById('nameNumberB').textContent = data.personB.numbers.name;
+
+                    // Display grids
+                    document.getElementById('gridA').innerHTML = '';
+                    document.getElementById('gridA').appendChild(createVedicGrid(data.personA.grid));
+
+                    document.getElementById('gridB').innerHTML = '';
+                    document.getElementById('gridB').appendChild(createVedicGrid(data.personB.grid));
+
+                    // Display insights
+                    const bestAspectsList = document.getElementById('bestAspects');
+                    bestAspectsList.innerHTML = '';
+                    data.insights.bestAspects.forEach(aspect => {
+                        const li = document.createElement('li');
+                        li.textContent = aspect;
+                        bestAspectsList.appendChild(li);
+                    });
+
+                    const challengesList = document.getElementById('challenges');
+                    challengesList.innerHTML = '';
+                    data.insights.challenges.forEach(challenge => {
+                        const li = document.createElement('li');
+                        li.textContent = challenge;
+                        challengesList.appendChild(li);
+                    });
+
+                    // Show sections
+                    document.getElementById('resultsSummary').style.display = 'block';
+                    document.getElementById('detailedNumbers').style.display = 'block';
+                    document.getElementById('gridSection').style.display = 'block';
+                    document.getElementById('aspectsSection').style.display = 'block';
+
+                    // Show scroll to top button
+                    document.getElementById('scrollTop').style.display = 'block';
+                }
+            }
+        }
+
+        // Show/hide scroll to top button
+        window.addEventListener('scroll', function() {
+            const scrollTop = document.getElementById('scrollTop');
+            scrollTop.style.display = window.scrollY > 300 ? 'block' : 'none';
+        });
+
+        // Load saved data when page loads
+        document.addEventListener('DOMContentLoaded', loadSavedData);
+    </script>
+</body>
+</html>
